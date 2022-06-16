@@ -2,7 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:opencv="http://schemas.android.com/apk/res-auto">
 
 <!--    <EditText-->
 <!--        android:layout_width="match_parent"-->
@@ -42,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/IPAddress"
-            android:text="192.168.43.177"
+            android:text="3.239.50.196"
             android:singleLine="true"
             android:textStyle="bold"/>
     </LinearLayout>
@@ -86,15 +88,12 @@
         android:textColor="#FF0000"
         android:textStyle="bold"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="\n\nAbout Us\nRights reserved by Ahmed Fawzy Gad 2019 (https://www.linkedin.com/in/ahmedfgad).\n\n
-The GitHub project is available here:\nhttps://github.com/ahmedfgad/AndroidFlask\n\n
-The project is documented in a tutorial at HeartBeat:\nhttps://heartbeat.fritz.ai/uploading-images-from-android-to-a-python-based-flask-server-691e4092a95e"
-        android:autoLink="web"
-        android:textAlignment="center"
-        android:textColor="#988734"
-        android:textStyle="bold"/>
+    <org.opencv.android.JavaCameraView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="gone"
+        android:id="@+id/tutorial1_activity_java_surface_view"
+        opencv:show_fps="true"
+        opencv:camera_id="any" />
 
 </LinearLayout>

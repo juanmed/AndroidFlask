@@ -23,11 +23,28 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
+import org.opencv.imgproc.Imgproc;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.concurrent.TimeUnit;
+import java.time.Instant;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -48,6 +65,16 @@ public class MainActivity extends AppCompatActivity {
     final int SELECT_MULTIPLE_IMAGES = 1;
     ArrayList<String> selectedImagesPaths; // Paths of the image(s) selected by the user.
     boolean imagesSelected = false; // Whether the user selected at least an image or not.
+
+    private boolean              mIsColorSelected = false;
+    private Mat                  mRgba;
+    private Scalar               mBlobColorRgba;
+    private Scalar               mBlobColorHsv;
+    private Mat                  mSpectrum;
+    private Size                 SPECTRUM_SIZE;
+    private Scalar               CONTOUR_COLOR;
+
+    private CameraBridgeViewBase mOpenCvCameraView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,8 +145,9 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             byte[] byteArray = stream.toByteArray();
-
-            multipartBodyBuilder.addFormDataPart("image" + i, "Android_Flask_" + i + ".jpg", RequestBody.create(MediaType.parse("image/*jpg"), byteArray));
+            Instant instant = Instant.now(); // Current moment in UTC.
+            String date = instant.toString();
+            multipartBodyBuilder.addFormDataPart("image" + i, date + "_Android_Flask_" + i + ".jpg", RequestBody.create(MediaType.parse("image/*jpg"), byteArray));
         }
 
         RequestBody postBodyImage = multipartBodyBuilder.build();
@@ -134,7 +162,15 @@ public class MainActivity extends AppCompatActivity {
 
     void postRequest(String postUrl, RequestBody postBody) {
 
-        OkHttpClient client = new OkHttpClient();
+        //OkHttpClient client = new OkHttpClient();
+        //client.setConnectTimeout(15, TimeUnit.SECONDS); // connect timeout
+        //client.setReadTimeout(15, TimeUnit.SECONDS);    // socket timeout
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .build();
 
         Request request = new Request.Builder()
                 .url(postUrl)
